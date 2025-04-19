@@ -4,8 +4,8 @@ def individual_serial(todo) -> dict:
         "name": todo["name"],
         "phone_number": todo["phone_number"],
         "unique_id": todo["unique_id"],
-        "age": todo["age"]
-
+        "age": todo["age"],
+        "medications": todo.get("medications", [])
     }
 
 def list_serial(todos) -> list:

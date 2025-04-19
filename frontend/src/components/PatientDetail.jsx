@@ -20,6 +20,8 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
 import './PatientDetail.css';
+import MedicationReminder from './MedicationReminder';
+import AudioAlert from './AudioAlert';
 
 // Register Chart.js components
 ChartJS.register(
@@ -452,6 +454,10 @@ const PatientDetail = () => {
     <div className="patient-detail">
       {effectiveAlertLevel > 0 && (
         <div className={`emergency-alert ${getAlertClass(effectiveAlertLevel)}`}>
+          <AudioAlert 
+            isActive={effectiveAlertLevel === 2 || effectiveAlertLevel === 3} 
+            type={effectiveAlertLevel === 3 ? 'fever' : 'high-risk'} 
+          />
           <h2>
             {effectiveAlertLevel === 1 ? 'MODERATE RISK ALERT' : 
              effectiveAlertLevel === 2 ? 'HIGH RISK ALERT' :
@@ -608,6 +614,9 @@ const PatientDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Medication Reminder Section */}
+      <MedicationReminder patientId={id} />
 
       {/* ECG Graph Section */}
       <div className="ecg-section">
