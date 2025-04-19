@@ -189,9 +189,33 @@ body.dark-mode .vital-card:hover {
   margin: 0;
 }
 
-.value.normal { color: var(--spo2); }
-.value.elevated { color: var(--pulse); }
-.value.low { color: var(--temp); }
+/* Values status classes */
+.value.elevated {
+  color: #f44336;
+}
+
+.value.low {
+  color: #2196f3;
+}
+
+.value.normal {
+  color: #4caf50;
+}
+
+/* Fever status - temperature displays in red */
+.value.fever {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Alert classes */
+.value.moderate-risk {
+  color: #ff9800;
+}
+
+.value.high-risk {
+  color: #f44336;
+}
 
 /* Color-coded vital signs */
 .pulse { color: var(--pulse); }
@@ -595,32 +619,65 @@ body.dark-mode .map-section {
 
 /* Emergency Alert Styles */
 .emergency-alert {
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  animation: pulse 2s infinite;
-  color: white;
-  font-weight: bold;
-}
-
-.emergency-alert h2 {
-  margin-top: 0;
-}
-
-.emergency-alert.normal {
-  background-color: #4CAF50;
-  border: 1px solid #388E3C;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-left: 10px solid #ccc;
 }
 
 .emergency-alert.moderate-risk {
-  background-color: #FF9800;
-  border: 1px solid #F57C00;
+  background-color: rgba(255, 152, 0, 0.1);
+  border-left-color: #FF9800;
 }
 
 .emergency-alert.high-risk {
-  background-color: #F44336;
-  border: 1px solid #D32F2F;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-left-color: #F44336;
+}
+
+.emergency-alert.fever {
+  background-color: rgba(255, 23, 68, 0.1);
+  border-left-color: #FF1744;
+  border: 2px solid #FF1744;
+  border-left-width: 10px;
+}
+
+.emergency-alert h2 {
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.emergency-alert.high-risk h2,
+.emergency-alert.fever h2 {
+  color: #D50000;
+}
+
+.emergency-alert p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+.emergency-alert.high-risk p,
+.emergency-alert.fever p {
+  font-weight: bold;
+}
+
+.manual-alert-indicator {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
 }
 
 /* Value status colors */
@@ -728,6 +785,22 @@ body.dark-mode .manual-alert-controls {
 .alert-btn.high-risk.active {
   background-color: #D32F2F;
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Fever alert button */
+.alert-btn.fever {
+  background-color: #FF1744;
+  box-shadow: 0 2px 4px rgba(255, 23, 68, 0.3);
+}
+
+.alert-btn.fever:hover {
+  background-color: #D50000;
+}
+
+.alert-btn.fever.active {
+  background-color: #D50000;
+  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.5);
   transform: translateY(-2px);
 }
 
@@ -983,4 +1056,15 @@ body.dark-mode .chart-container {
   .weekly-records-section .historical-charts-grid {
     grid-template-columns: repeat(2, 4cm);
   }
+}
+
+/* Fever card styling */
+.vital-card.fever-card {
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid #F44336;
+}
+
+.vital-card.fever-card h3 {
+  color: #F44336;
+  font-weight: bold;
 }

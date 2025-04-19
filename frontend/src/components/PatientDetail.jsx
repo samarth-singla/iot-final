@@ -201,9 +201,20 @@ const PatientDetail = () => {
 
   // Helper function to determine temperature status
   const getTemperatureStatus = (temp) => {
+    // First check temperature ranges
     if (temp > 37.8) return 'elevated';
     if (temp < 35.5) return 'low';
     return 'normal';
+  };
+
+  // Helper function to get fever status based on alert level
+  const getTemperatureWithFeverStatus = (temp, alertLevel) => {
+    // If alert level indicates fever (level 3), return 'fever'
+    if (alertLevel === 3) {
+      return 'fever';
+    }
+    // Otherwise use regular temperature status
+    return getTemperatureStatus(temp);
   };
 
   // Helper function to determine heart rate status
@@ -219,6 +230,7 @@ const PatientDetail = () => {
       case 0: return 'normal';
       case 1: return 'moderate-risk';
       case 2: return 'high-risk';
+      case 3: return 'fever';
       default: return 'normal';
     }
   };
@@ -236,8 +248,11 @@ const PatientDetail = () => {
 
   // Determine effective alert level (manual override or data-driven)
   const effectiveAlertLevel = manualAlertLevel !== null ? manualAlertLevel : patientData.vitals.alertLevel;
-  const alertStatusText = effectiveAlertLevel === 0 ? "Normal" : 
-                          effectiveAlertLevel === 1 ? "Moderate Risk" : "High Risk";
+  const alertStatusText = 
+    effectiveAlertLevel === 0 ? "Normal" : 
+    effectiveAlertLevel === 1 ? "Moderate Risk" : 
+    effectiveAlertLevel === 2 ? "High Risk" :
+    effectiveAlertLevel === 3 ? "Fever" : "Normal";
 
   // Chart options for historical data
   const getHistoricalChartOptions = (title, yAxisLabel, color) => {
@@ -438,12 +453,19 @@ const PatientDetail = () => {
       {effectiveAlertLevel > 0 && (
         <div className={`emergency-alert ${getAlertClass(effectiveAlertLevel)}`}>
           <h2>
-            {effectiveAlertLevel === 1 ? 'MODERATE RISK ALERT' : 'HIGH RISK ALERT'}
+            {effectiveAlertLevel === 1 ? 'MODERATE RISK ALERT' : 
+             effectiveAlertLevel === 2 ? 'HIGH RISK ALERT' :
+             effectiveAlertLevel === 3 ? 'FEVER ALERT' :
+             'FEVER ALERT'}
           </h2>
           <p>
             {effectiveAlertLevel === 1 
-              ? 'Patient shows moderate risk signs. Monitor carefully.' 
-              : 'EMERGENCY! Patient shows high risk signs. Immediate attention required!'}
+              ? 'Patient shows moderate cardiac risk signs. Monitor carefully.' 
+              : effectiveAlertLevel === 2
+              ? 'EMERGENCY! Patient shows high cardiac risk signs. Immediate attention required!'
+              : effectiveAlertLevel === 3
+              ? 'Patient has fever with low cardiac risk. Monitor for changes.'
+              : 'Patient has fever with high cardiac risk. Immediate medical intervention required!'}
           </p>
           {manualAlertLevel !== null && (
             <div className="manual-alert-indicator">Manually set by doctor</div>
@@ -492,13 +514,19 @@ const PatientDetail = () => {
             className={`alert-btn moderate-risk ${manualAlertLevel === 1 ? 'active' : ''}`}
             onClick={() => handleSetAlert(1)}
           >
-            Set Moderate Risk
+            Moderate Risk
           </button>
           <button 
             className={`alert-btn high-risk ${manualAlertLevel === 2 ? 'active' : ''}`}
             onClick={() => handleSetAlert(2)}
           >
-            Set High Risk
+            High Risk
+          </button>
+          <button 
+            className={`alert-btn fever ${manualAlertLevel === 3 ? 'active' : ''}`}
+            onClick={() => handleSetAlert(3)}
+          >
+            Fever
           </button>
           {manualAlertLevel !== null && (
             <button 
@@ -526,9 +554,9 @@ const PatientDetail = () => {
           </button>
         </div>
         <div className="vitals-grid">
-          <div className="vital-card">
+          <div className={`vital-card ${getTemperatureWithFeverStatus(patientData.vitals.temperature, effectiveAlertLevel) === 'fever' ? 'fever-card' : ''}`}>
             <h3>Temperature</h3>
-            <p className={`value ${getTemperatureStatus(patientData.vitals.temperature)}`}>
+            <p className={`value ${getTemperatureWithFeverStatus(patientData.vitals.temperature, effectiveAlertLevel)}`}>
               {patientData.vitals.temperature}°C
             </p>
           </div>
