@@ -457,9 +457,20 @@ body.dark-mode .map-section {
 .map-section h2 {
   color: var(--text-primary);
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   border-bottom: 2px solid var(--accent-blue);
   padding-bottom: 0.5rem;
+}
+
+.last-known-timestamp {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 152, 0, 0.1);
+  border-left: 3px solid #FF9800;
+  border-radius: 0 4px 4px 0;
 }
 
 .map-container {
@@ -467,6 +478,7 @@ body.dark-mode .map-section {
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .leaflet-container {
@@ -731,13 +743,16 @@ body.dark-mode .map-section {
 
 @keyframes pulse {
   0% {
-    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
   }
   50% {
-    opacity: 0.7;
+    transform: scale(1.2);
+    box-shadow: 0 0 10px 3px rgba(76, 175, 80, 0.4);
   }
   100% {
-    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
   }
 }
 
@@ -1097,4 +1112,160 @@ body.dark-mode .chart-container {
 .vital-card.fever-card h3 {
   color: #F44336;
   font-weight: bold;
+}
+
+/* Blood Pressure Indicators */
+.bp-indicators {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bp-category {
+  display: flex;
+  align-items: center;
+}
+
+.bp-high, .bp-low, .bp-normal {
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.bp-high {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: #f44336;
+}
+
+.bp-low {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: #2196f3;
+}
+
+.bp-normal {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+}
+
+.bp-change-indicator {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.bp-trend-up {
+  color: #f44336;
+}
+
+.bp-trend-down {
+  color: #2196f3;
+}
+
+/* Vital card styling - add animation for BP changes */
+.vital-card.bp-changing {
+  animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+  0% {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Location card styling */
+.vital-card.location-card {
+  background-color: var(--panel-bg);
+}
+
+.location-status {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  gap: 5px;
+}
+
+.location-status.active {
+  color: #4caf50;
+}
+
+.location-status.stale {
+  color: #ff9800;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.active {
+  background-color: #4CAF50;
+  box-shadow: 0 0 5px #4CAF50;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.stale {
+  background-color: #ff9800;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px 3px rgba(76, 175, 80, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.no-location-container {
+  text-align: center;
+  padding: 15px;
+}
+
+.no-location {
+  font-size: 1.1em;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.no-location-subtitle {
+  font-size: 0.9em;
+  color: #999;
+}
+
+.location-status {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.active {
+  background-color: #4CAF50;
+}
+
+.status-indicator.stale {
+  background-color: #FFA726;
 }

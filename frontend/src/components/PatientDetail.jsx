@@ -55,6 +55,8 @@ const PatientDetail = () => {
   const [historicalData, setHistoricalData] = useState(null);
   const [loadingHistorical, setLoadingHistorical] = useState(true);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [prevBP, setPrevBP] = useState(null);
+  const [bpChanging, setBpChanging] = useState(false);
 
   // ECG Chart configuration
   const ecgChartOptions = {
@@ -131,6 +133,29 @@ const PatientDetail = () => {
 
     try {
       const vitalsData = await getPatientVitals(id);
+      
+      // Check if blood pressure has changed significantly
+      if (patientData && patientData.vitals && patientData.vitals.bp) {
+        const prevSystolic = patientData.vitals.bp.systolic;
+        const prevDiastolic = patientData.vitals.bp.diastolic;
+        const newSystolic = vitalsData.vitals.bp.systolic;
+        const newDiastolic = vitalsData.vitals.bp.diastolic;
+        
+        // Calculate change percentage
+        const systolicChange = Math.abs(newSystolic - prevSystolic);
+        const diastolicChange = Math.abs(newDiastolic - prevDiastolic);
+        
+        // If either value changed by more than 5 mmHg, trigger animation
+        if (systolicChange > 5 || diastolicChange > 3) {
+          setBpChanging(true);
+          // Reset animation after 5 seconds
+          setTimeout(() => setBpChanging(false), 5000);
+        }
+        
+        // Store previous BP values
+        setPrevBP({ systolic: prevSystolic, diastolic: prevDiastolic });
+      }
+      
       setPatientData(prev => ({
         ...prev,
         ...vitalsData
@@ -141,7 +166,7 @@ const PatientDetail = () => {
       setError(error.message);
       setLoading(false);
     }
-  }, [id]);
+  }, [id, patientData]);
 
   useEffect(() => {
     fetchVitals();
@@ -589,11 +614,29 @@ const PatientDetail = () => {
             </p>
           </div>
 
-          <div className="vital-card">
+          <div className={`vital-card ${bpChanging ? 'bp-changing' : ''}`}>
             <h3>Blood Pressure</h3>
             <p className={`value ${patientData.status.bp}`}>
               {patientData.vitals.bp.systolic}/{patientData.vitals.bp.diastolic} mmHg
             </p>
+            <div className="bp-indicators">
+              <div className="bp-category">
+                {patientData.vitals.bp.systolic > 140 || patientData.vitals.bp.diastolic > 90 ? 
+                  <span className="bp-high">High</span> : 
+                patientData.vitals.bp.systolic < 90 || patientData.vitals.bp.diastolic < 60 ? 
+                  <span className="bp-low">Low</span> : 
+                  <span className="bp-normal">Normal</span>
+                }
+              </div>
+              <div className="bp-change-indicator">
+                {patientData.vitals.heartRate > 100 ? 
+                  <span className="bp-trend-up">↑ with elevated HR</span> :
+                patientData.vitals.heartRate < 60 ? 
+                  <span className="bp-trend-down">↓ with low HR</span> :
+                  <span></span>
+                }
+              </div>
+            </div>
           </div>
 
           <div className="vital-card">
@@ -605,11 +648,36 @@ const PatientDetail = () => {
             </p>
           </div>
 
-          {patientData.location.lat && patientData.location.lng && (
+          {/* Location Card */}
+          {patientData && (
             <div className="vital-card location-card">
-              <h3>Location</h3>
-              <p>Lat: {patientData.location.lat}</p>
-              <p>Long: {patientData.location.lng}</p>
+              <h3>Patient Location</h3>
+              {patientData.location && patientData.location.lat && patientData.location.lng ? (
+                <>
+                  <p>Latitude: {patientData.location.lat.toFixed(6)}</p>
+                  <p>Longitude: {patientData.location.lng.toFixed(6)}</p>
+                  <div className={`location-status ${patientData.location.isLastKnown ? 'stale' : 'active'}`}>
+                    <span className={`status-indicator ${patientData.location.isLastKnown ? 'stale' : 'active'}`}></span>
+                    {patientData.location.isLastKnown ? (
+                      <>
+                        Last known location
+                        {patientData.location.timestamp && (
+                          <span className="timestamp">
+                            as of {new Date(patientData.location.timestamp).toLocaleString()}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      'Current location'
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="no-location-container">
+                  <p className="no-location">Location tracking unavailable</p>
+                  <p className="no-location-subtitle">Device may be indoor or location service is disabled</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -741,28 +809,32 @@ const PatientDetail = () => {
       </div>
 
       {/* Map Section */}
-      {patientData.location.lat && patientData.location.lng && (
+      {patientData && patientData.location && patientData.location.lat && patientData.location.lng && (
         <div className="map-section">
-          <h2>Patient Location</h2>
-          <div className="map-container">
-            <MapContainer
-              center={[patientData.location.lat, patientData.location.lng]}
-              zoom={13}
-              style={{ height: '400px', width: '100%' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={[patientData.location.lat, patientData.location.lng]}>
-                <Popup>
-                  Patient's Location<br />
-                  Lat: {patientData.location.lat}<br />
-                  Long: {patientData.location.lng}
-                </Popup>
-              </Marker>
-            </MapContainer>
-          </div>
+          <h2>
+            {patientData.location.isLastKnown 
+              ? "Last Known Location" 
+              : "Current Location"}
+          </h2>
+          <MapContainer
+            center={[patientData.location.lat, patientData.location.lng]}
+            zoom={13}
+            style={{ height: '400px', width: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            <Marker position={[patientData.location.lat, patientData.location.lng]}>
+              <Popup>
+                {patientData.location.isLastKnown 
+                  ? "Last Known Location" 
+                  : "Current Location"}
+                <br />
+                Recorded: {new Date(patientData.location.timestamp).toLocaleString()}
+              </Popup>
+            </Marker>
+          </MapContainer>
         </div>
       )}
 
